@@ -10,7 +10,7 @@ import numpy as np
 from netCDF4 import Dataset as ncdf
 
 # Module that performs the conversion
-def convertgcm(filein = 'data/gcm_rocke3d', fileout = 'gcm_psg.dat', itime=0):
+def convertgcm(filein = 'data/Earth15', fileout = 'Earth15.dat', itime=0):
 	# Read ROCKE-3D outputs across three different netCDF files
 	nfile = ncdf("%s_aijk.nc" % filein)
 	uk = np.array((nfile.variables['ub'])[:]);
@@ -27,10 +27,13 @@ def convertgcm(filein = 'data/gcm_rocke3d', fileout = 'gcm_psg.dat', itime=0):
 	h2o = np.array((nfile.variables['SpHuL'])[:]) # specific humidity in kg/kg
 	h2o = np.where((h2o>0) & (np.isfinite(h2o)), h2o, 1e-30)
 	h2o = h2o/(1.0-h2o); h2o = h2o*(28.0/18.0) # Water vapor abundance [molecules/molecule]
-	Water = np.array((nfile.variables['wcmmr'])[:])  # Liquid water clouds in kg/kg
+	Water = np.array((nfile.variables['wtrcld'])[:])  # Liquid water clouds in kg/kg
 	Water = np.where((Water>0) & (np.isfinite(Water)), Water, 1e-30)
-	WaterIce = np.array((nfile.variables['icmmr'])[:]) # Water ice clouds in kg/kg
+	WaterIce = np.array((nfile.variables['icecld'])[:]) # Water ice clouds in kg/kg
 	WaterIce = np.where((WaterIce>0) & (np.isfinite(WaterIce)), WaterIce, 1e-30)
+	nfile.close()
+	
+	nfile = ncdf("%s_ajl.nc" % filein)
 	Water_size = np.array((nfile.variables['wcsiz'])[:])/1e6 # Size of liquid water clouds in m
 	Water_size = np.where((Water_size>0) & (np.isfinite(Water_size)), Water_size, 1e-6)
 	WaterIce_size = np.array((nfile.variables['icsiz'])[:])/1e6 # Size of ice clouds in m
@@ -65,12 +68,12 @@ def convertgcm(filein = 'data/gcm_rocke3d', fileout = 'gcm_psg.dat', itime=0):
 
 	# Save object parameters
 	newf = []
-	newf.append('<OBJECT>Exoplanet')
-	newf.append('<OBJECT-NAME>Exoplanet')
-	newf.append('<OBJECT-DATE>2018/01/01 10:00')
-	newf.append('<OBJECT-DIAMETER>12742')
-	newf.append('<OBJECT-GRAVITY>9.8')
-	newf.append('<OBJECT-GRAVITY-UNIT>g')
+	newf.append('<OBJECT>Earth15') #
+	newf.append('<OBJECT-NAME>Earth15') #
+	newf.append('<OBJECT-DATE>2024/01/10') #
+	newf.append('<OBJECT-DIAMETER>12742') #
+	newf.append('<OBJECT-GRAVITY>9.80665') #
+	newf.append('<OBJECT-GRAVITY-UNIT>g') #
 	newf.append('<OBJECT-STAR-DISTANCE>1.0')
 	newf.append('<OBJECT-STAR-VELOCITY>0.0')
 	newf.append('<OBJECT-SOLAR-LONGITUDE>45.0')
@@ -90,10 +93,10 @@ def convertgcm(filein = 'data/gcm_rocke3d', fileout = 'gcm_psg.dat', itime=0):
 	newf.append('<ATMOSPHERE-STRUCTURE>Equilibrium')
 	newf.append('<ATMOSPHERE-PRESSURE>1.0')
 	newf.append('<ATMOSPHERE-PUNIT>bar')
-	newf.append('<ATMOSPHERE-WEIGHT>28.0')
-	newf.append('<ATMOSPHERE-LAYERS>0')
-	newf.append('<ATMOSPHERE-NGAS>3')
-	newf.append('<ATMOSPHERE-GAS>N2,CO2,H2O')
+	newf.append('<ATMOSPHERE-WEIGHT>28.9655') #
+	newf.append('<ATMOSPHERE-LAYERS>40') #
+	newf.append('<ATMOSPHERE-NGAS>5') #
+	newf.append('<ATMOSPHERE-GAS>N2,CO2,H2O,O2,Ar') #
 	newf.append('<ATMOSPHERE-TYPE>HIT[22],HIT[2],HIT[1]')
 	newf.append('<ATMOSPHERE-ABUN>99,400,1')
 	newf.append('<ATMOSPHERE-UNIT>pct,ppm,scl')
@@ -108,10 +111,10 @@ def convertgcm(filein = 'data/gcm_rocke3d', fileout = 'gcm_psg.dat', itime=0):
 	newf.append('<ATMOSPHERE-ASUNI>scl,scl')#
 
 	# Save surface parameters
-	newf.append('<SURFACE-TEMPERATURE>300')
+	newf.append('<SURFACE-TEMPERATURE>283.15') #
 	newf.append('<SURFACE-ALBEDO>0.2')
 	newf.append('<SURFACE-EMISSIVITY>1.0')
-	newf.append('<SURFACE-NSURF>0')
+	newf.append('<SURFACE-NSURF>0') #?
 
 	# Instrument parameters (defaults)
 	newf.append('<GENERATOR-RANGE1>0.4')
